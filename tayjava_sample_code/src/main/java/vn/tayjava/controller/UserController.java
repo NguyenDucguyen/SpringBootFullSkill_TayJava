@@ -1,6 +1,9 @@
 package vn.tayjava.controller;
 
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.tayjava.dto.request.UserRequestDTO;
 
@@ -10,12 +13,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/user")
+@Validated
 public class UserController {
 
-//    @PostMapping(value="/",headers ="/apiKey=v1.0")
-    @RequestMapping(method = POST, path ="/",headers ="/apiKey=v1.0")
-    public String addUser(@RequestBody UserRequestDTO userDTO){
-        return "user added";
+    @PostMapping("/")
+    public String addUser(@Valid @RequestBody UserRequestDTO user) {
+        return "User added";
     }
 
     @PutMapping("/{userId}")
@@ -25,13 +28,13 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public String changeStatus(@PathVariable int userId, @RequestParam(required = false) boolean status){
+    public String changeStatus(@PathVariable int userId, @Min(1) @RequestParam int status){
         System.out.println("Request change user status, userId=" + userId);
         return "user status changed";
     }
 
     @DeleteMapping("/{userId}")
-    public String deleteUser(@PathVariable int userId){
+    public String deleteUser(@Min(1) @PathVariable int userId){
         System.out.println("Request delete userId=" + userId);
         return "user deleted";
     }
@@ -51,6 +54,7 @@ public class UserController {
         return List.of(new UserRequestDTO("Tay","Java","email","phone"),
                 new UserRequestDTO("Tay","Python","email","phone"));
     }
+
 
 
 }

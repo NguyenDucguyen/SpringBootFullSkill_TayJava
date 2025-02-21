@@ -1,15 +1,14 @@
 package vn.tayjava.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import vn.tayjava.util.PhoneNumber;
+import jakarta.validation.constraints.*;
+import vn.tayjava.util.*;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+
+import static vn.tayjava.util.Gender.*;
 
 public class UserRequestDTO implements Serializable {
 
@@ -30,6 +29,17 @@ public class UserRequestDTO implements Serializable {
     @NotNull(message = "dateOfBirth must be not null")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private Date dateOfBirth;
+
+//    @Pattern(regexp = "^ACTIVE|INACTIVE|NONE$", message = "status must be one in {ACTIVE, INACTIVE, NONE}")
+    @EnumPattern(name ="status",regexp = "ACTIVE|INACTIVE|NONE")
+    private UserStatus status;
+
+    @GenderSubset(anyOf = {MALE,FEMALE,OTHER})
+    private Gender gender;
+
+    @NotNull(message = "type must be not null")
+    @EnumValue(name = "type", enumClass = UserType.class)
+    private String type;
 
     @NotNull(message = "username must be not null")
     private String username;
@@ -184,5 +194,17 @@ public class UserRequestDTO implements Serializable {
 
     public void setAddresses(Set<Address> addresses) {
         this.addresses = addresses;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public String getType() {
+        return type;
     }
 }

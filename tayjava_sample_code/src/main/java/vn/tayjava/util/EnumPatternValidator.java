@@ -29,4 +29,6 @@ public class EnumPatternValidator implements ConstraintValidator<EnumPattern, En
         Matcher m = pattern.matcher(value.name());
         return m.matches();
     }
+
+
 }

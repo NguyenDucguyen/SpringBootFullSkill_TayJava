@@ -21,7 +21,7 @@ public class UserRequestDTO implements Serializable {
     @Email(message = "email invalid format") // Chi chap nhan nhung gia tri dung dinh dang email
     private String email;
 
-    //@Pattern(regexp = "^\\d{10}$", message = "phone invalid format")
+//    @Pattern(regexp = "^\\d{10}$", message = "phone invalid format")
     @PhoneNumber(message = "phone invalid format")
     private String phone;
 

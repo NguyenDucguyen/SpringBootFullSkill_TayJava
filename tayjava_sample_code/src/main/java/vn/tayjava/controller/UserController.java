@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.tayjava.dto.request.UserRequestDTO;
 import vn.tayjava.dto.response.ResponseData;
 import vn.tayjava.dto.response.ResponseSuccess;
+import vn.tayjava.service.UserService;
 
 import java.util.List;
 
@@ -38,9 +40,19 @@ public class UserController {
 //                                                    """)))
 //    }
 //    )
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/")
     public ResponseData<Integer> addUser(@Valid @RequestBody UserRequestDTO user) {
-        return new ResponseData<>(HttpStatus.CREATED.value(), "User added successfully",1);
+        System.out.println("Request add user" + user.getFirstName());
+        try {
+            userService.addUser(user);
+            return new ResponseData<>(HttpStatus.CREATED.value(), "User added successfully", 1);
+
+        } catch (RuntimeException e) {
+            return new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "save user failed");
+        }
     }
 
 //    @Operation(summary = "summary",description = "description",responses = {

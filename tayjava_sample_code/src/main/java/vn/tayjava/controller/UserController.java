@@ -1,125 +1,67 @@
 package vn.tayjava.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import vn.tayjava.configuration.Translator;
 import vn.tayjava.dto.request.UserRequestDTO;
 import vn.tayjava.dto.response.ResponseData;
-import vn.tayjava.dto.response.ResponseSuccess;
-import vn.tayjava.service.UserService;
 
 import java.util.List;
-
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/user")
 @Validated
+@Slf4j
+@Tag(name = "User Controller")
 public class UserController {
 
-//    @Operation(summary = "summary",description = "description",responses = {
-//            @ApiResponse(responseCode = "201", description = "User added successfully",
-//                         content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-//                                            examples = @ExampleObject(name ="ex name", summary = "ex summary",
-//                                            value = """
-//                                                    {
-//                                                        "status": 201,
-//                                                        "message": "User added successfully",
-//                                                        "data": 1
-//                                                    }
-//                                                    """)))
-//    }
-//    )
-    @Autowired
-    private UserService userService;
-
-    @PostMapping("/")
+    @Operation(method = "POST", summary = "Add new user", description = "Send a request via this API to create new user")
+    @PostMapping(value = "/")
     public ResponseData<Integer> addUser(@Valid @RequestBody UserRequestDTO user) {
-        System.out.println("Request add user" + user.getFirstName());
-        try {
-            userService.addUser(user);
-            return new ResponseData<>(HttpStatus.CREATED.value(), "User added successfully", 1);
-
-        } catch (RuntimeException e) {
-            return new ResponseData<>(HttpStatus.BAD_REQUEST.value(), "save user failed");
-        }
+        log.info("Request add user, {} {}", user.getFirstName(), user.getLastName());
+        return new ResponseData<>(HttpStatus.CREATED.value(), Translator.toLocale("user.add.success"), 1);
     }
 
-//    @Operation(summary = "summary",description = "description",responses = {
-//            @ApiResponse(responseCode = "202", description = "User updated successfully",
-//                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-//                            examples = @ExampleObject(name ="ex name", summary = "ex summary",
-//                                    value = """
-//                                                    {
-//                                                        "status": 202,
-//                                                        "message": "User updated successfully",
-//                                                        "data": null
-//                                                    }
-//                                                    """)))
-//    }
-//    )
+    @Operation(summary = "Update user", description = "Send a request via this API to update user")
     @PutMapping("/{userId}")
-    public ResponseData<?> updateUser(@PathVariable int userId, @RequestBody UserRequestDTO userDTO){
-        System.out.println("Request user with userId=" + userId);
-        return new ResponseData<>(HttpStatus.ACCEPTED.value(), "User updated successfully");
+    public ResponseData<?> updateUser(@PathVariable @Min(1) int userId, @Valid @RequestBody UserRequestDTO user) {
+        log.info("Request update userId={}", userId);
+        return new ResponseData<>(HttpStatus.ACCEPTED.value(), Translator.toLocale("user.upd.success"));
     }
 
-
-//    @Operation(summary = "summary",description = "description",responses = {
-//            @ApiResponse(responseCode = "202", description = "User changed status successfully",
-//                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-//                            examples = @ExampleObject(name ="ex name", summary = "ex summary",
-//                                    value = """
-//                                                    {
-//                                                        "status": 202,
-//                                                        "message": "User changed status successfully",
-//                                                        "data": null
-//                                                    }
-//                                                    """)))
-//    }
-//    )
+    @Operation(summary = "Change status of user", description = "Send a request via this API to change status of user")
     @PatchMapping("/{userId}")
-    public ResponseData<?> changeStatus(@PathVariable int userId, @Min(1) @RequestParam int status){
-        System.out.println("Request change user status, userId=" + userId);
-        return new ResponseData<>(HttpStatus.ACCEPTED.value(), "User change status successfully");
+    public ResponseData<?> updateStatus(@Min(1) @PathVariable int userId, @RequestParam boolean status) {
+        log.info("Request change status, userId={}", userId);
+        return new ResponseData<>(HttpStatus.ACCEPTED.value(), Translator.toLocale("user.change.success"));
     }
 
-
+    @Operation(summary = "Delete user permanently", description = "Send a request via this API to delete user permanently")
     @DeleteMapping("/{userId}")
-    public ResponseData<?> deleteUser(@Min(1) @PathVariable int userId){
-        System.out.println("Request delete userId=" + userId);
-        return new ResponseData<>(HttpStatus.NO_CONTENT.value(), "User deleted successfully");
+    public ResponseData<?> deleteUser(@PathVariable @Min(value = 1, message = "userId must be greater than 0") int userId) {
+        log.info("Request delete userId={}", userId);
+        return new ResponseData<>(HttpStatus.NO_CONTENT.value(), Translator.toLocale("user.del.success"));
     }
 
+    @Operation(summary = "Get user detail", description = "Send a request via this API to get user information")
     @GetMapping("/{userId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseData<UserRequestDTO> getUser(@PathVariable int userId){
-        System.out.println("Request get user detail by userID=" + userId);
-        return new ResponseData(HttpStatus.OK.value(), "User",new UserRequestDTO("Tay","Java","email","phone"));
+    public ResponseData<UserRequestDTO> getUser(@PathVariable @Min(1) int userId) {
+        log.info("Request get user detail, userId={}", userId);
+        return new ResponseData<>(HttpStatus.OK.value(), "user", new UserRequestDTO("Tay", "Java", "admin@tayjava.vn", "0123456789"));
     }
 
+    @Operation(summary = "Get list of users per pageNo", description = "Send a request via this API to get user list by pageNo and pageSize")
     @GetMapping("/list")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseData<List<UserRequestDTO>> getUserList(
-            @RequestParam(required = false) String email,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize){
-        System.out.println("Request get user list");
-        return new ResponseData<>(HttpStatus.OK.value(), "User List",List.of(new UserRequestDTO("Tay","Java","email","phone"),
-                new UserRequestDTO("Tay","Python","email","phone")));
-
+    public ResponseData<List<UserRequestDTO>> getAllUsers(@RequestParam(defaultValue = "0", required = false) int pageNo,
+                                                          @Min(10) @RequestParam(defaultValue = "20", required = false) int pageSize) {
+        log.info("Request get all of users");
+        return new ResponseData<>(HttpStatus.OK.value(), "users", List.of(new UserRequestDTO("Tay", "Java", "admin@tayjava.vn", "0123456789"),
+                new UserRequestDTO("Leo", "Messi", "leomessi@email.com", "0123456456")));
     }
-
-
-
 }
